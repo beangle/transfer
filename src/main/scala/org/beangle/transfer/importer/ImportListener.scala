@@ -61,3 +61,20 @@ trait ImportListener {
     }
   }
 }
+
+abstract class EntityImportListener extends ImportListener {
+
+  private def shortName: String = {
+    val alias = importer.asInstanceOf[EntityImporter].aliases
+    require(alias.size == 1, s"Only Single EntityImport supprted,But got ${alias}")
+    alias.head
+  }
+
+  def current[T]: T = {
+    importer.getObj(shortName).asInstanceOf[T]
+  }
+
+  def current_=[T <: AnyRef](entity: T): Unit = {
+    importer.setObj(shortName, entity)
+  }
+}
