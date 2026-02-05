@@ -23,10 +23,10 @@ ThisBuild / developers := List(
 ThisBuild / description := "The Beangle Transfer Library"
 ThisBuild / homepage := Some(url("https://beangle.github.io/transfer/index.html"))
 
-val beangle_commons = "org.beangle.commons" % "beangle-commons" % "5.8.1"
-val beangle_model = "org.beangle.data" % "beangle-model" % "5.11.6"
-val beangle_template = "org.beangle.template" % "beangle-template" % "0.2.3"
-val beangle_doc_excel = "org.beangle.doc" % "beangle-doc-excel" % "0.5.1"
+val beangle_commons = "org.beangle.commons" % "beangle-commons" % "6.0.0-SNAPSHOT"
+val beangle_model = "org.beangle.data" % "beangle-model" % "5.11.7-SNAPSHOT"
+val beangle_template = "org.beangle.template" % "beangle-template" % "0.2.4-SNAPSHOT"
+val beangle_doc_excel = "org.beangle.doc" % "beangle-doc-excel" % "0.5.2-SNAPSHOT"
 
 lazy val root = (project in file("."))
   .settings(

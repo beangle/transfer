@@ -17,12 +17,11 @@
 
 package org.beangle.transfer.exporter
 
-import org.beangle.commons.logging.Logging
-import org.beangle.transfer.Format
+import org.beangle.transfer.{Format, TransferLogger}
 
 import java.io.OutputStream
 
-class SimpleExporter extends Exporter, Logging {
+class SimpleExporter extends Exporter {
   var current: Any = _
   var context: ExportContext = _
   var attrs: Array[String] = _
@@ -68,7 +67,7 @@ class SimpleExporter extends Exporter, Logging {
         try {
           values(i) = context.getPropertyValue(current.asInstanceOf[AnyRef], attrs(i))
         } catch {
-          case e: Exception => logger.error("occur in get property :" + attrs(i), e)
+          case e: Exception => TransferLogger.error("occur in get property :" + attrs(i), e)
         }
       }
       writer.write(values)

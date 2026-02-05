@@ -19,8 +19,7 @@ package org.beangle.transfer.importer
 
 import org.beangle.commons.io.{DataType, IOs}
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
-import org.beangle.transfer.Format
+import org.beangle.transfer.{Format, TransferLogger}
 import org.beangle.transfer.importer.{Attribute, Reader}
 
 import java.io.LineNumberReader
@@ -30,7 +29,7 @@ import java.io.LineNumberReader
  *
  * @author chaostone
  */
-class CsvReader(reader: LineNumberReader) extends Reader with Logging {
+class CsvReader(reader: LineNumberReader) extends Reader {
 
   private var headIndex = 0
   private var indexInCsv = 1
@@ -41,7 +40,7 @@ class CsvReader(reader: LineNumberReader) extends Reader with Logging {
       try {
         line = reader.readLine()
       } catch {
-        case e: Throwable => logger.error("read csv", e);
+        case e: Throwable => TransferLogger.error("read csv", e);
       }
       indexInCsv += 1
     }
@@ -58,7 +57,7 @@ class CsvReader(reader: LineNumberReader) extends Reader with Logging {
     try {
       curData = reader.readLine()
     } catch {
-      case e1: Throwable => logger.error(curData, e1);
+      case e1: Throwable => TransferLogger.error(curData, e1);
     }
     indexInCsv += 1
     if (null == curData) {

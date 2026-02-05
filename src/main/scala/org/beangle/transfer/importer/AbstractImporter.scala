@@ -18,7 +18,7 @@
 package org.beangle.transfer.importer
 
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
+import org.beangle.transfer.TransferLogger
 
 import scala.collection.mutable.ListBuffer
 
@@ -26,7 +26,7 @@ import scala.collection.mutable.ListBuffer
  *
  * @author chaostone
  */
-abstract class AbstractImporter(val config: Importer.Config) extends Importer, Logging {
+abstract class AbstractImporter(val config: Importer.Config) extends Importer {
   protected var result: ImportResult = _
   protected val listeners = new ListBuffer[ImportListener]
   protected val mstatus = new Importer.MutableStatus
@@ -69,7 +69,7 @@ abstract class AbstractImporter(val config: Importer.Config) extends Importer, L
           }
         } catch {
           case e: Throwable =>
-            logger.error(e.getMessage, e)
+            TransferLogger.error(e.getMessage, e)
             if config.stopOnError then
               stopped = true
               tr.addFailure("导入异常,剩余数据停止导入", e.getMessage)
@@ -84,7 +84,7 @@ abstract class AbstractImporter(val config: Importer.Config) extends Importer, L
     } finally {
       if (null != reader) reader.close()
     }
-    logger.debug("importer elapse: " + (System.currentTimeMillis() - transferStartAt))
+    TransferLogger.debug("importer elapse: " + (System.currentTimeMillis() - transferStartAt))
   }
 
   def addListener(listener: ImportListener): Importer = {

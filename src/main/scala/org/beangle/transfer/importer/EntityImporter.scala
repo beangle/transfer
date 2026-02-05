@@ -18,12 +18,11 @@
 package org.beangle.transfer.importer
 
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 import org.beangle.data.model.Entity
 import org.beangle.data.model.meta.{Domain, EntityType}
 import org.beangle.data.model.util.Populator
 import org.beangle.data.orm.Jpas
-import org.beangle.transfer.IllegalFormatException
+import org.beangle.transfer.{IllegalFormatException, TransferLogger}
 import org.beangle.transfer.importer.Importer.Mode.{Insert, Update}
 
 /**
@@ -60,7 +59,7 @@ object DefaultEntityImporter {
  *
  * @author chaostone
  */
-class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(config), EntityImporter, Logging {
+class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(config), EntityImporter {
   // [alias,entityType]
   protected val entityTypes = new collection.mutable.HashMap[String, EntityType]
 
@@ -166,7 +165,7 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
           entity = entityType.newInstance()
           objs.put(alias, entity)
         case None =>
-          logger.error(s"Not register entity type for $alias")
+          TransferLogger.error(s"Not register entity type for $alias")
           throw new IllegalFormatException("Not register entity type for " + alias, null)
       }
     }

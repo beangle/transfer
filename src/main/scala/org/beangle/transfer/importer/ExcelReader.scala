@@ -22,7 +22,6 @@ import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.beangle.commons.io.DataType
 import org.beangle.commons.lang.Strings
-import org.beangle.commons.logging.Logging
 import org.beangle.doc.excel.CellOps.*
 import org.beangle.transfer.Format
 import org.beangle.transfer.importer.{Attribute, Reader}
@@ -30,11 +29,11 @@ import org.beangle.transfer.importer.{Attribute, Reader}
 import java.io.InputStream
 
 /**
-  * Excel的每行一条数据的读取器
-  *
-  * @author chaostone
-  */
-class ExcelReader(is: InputStream, sheetNum: Int = 0, val format: Format = Format.Xlsx) extends Reader with Logging {
+ * Excel的每行一条数据的读取器
+ *
+ * @author chaostone
+ */
+class ExcelReader(is: InputStream, sheetNum: Int = 0, val format: Format = Format.Xlsx) extends Reader {
 
   /** 读取的工作表 */
   private val sheet = buildSheet(is, sheetNum)
@@ -66,8 +65,8 @@ class ExcelReader(is: InputStream, sheetNum: Int = 0, val format: Format = Forma
   }
 
   /**
-    * 读取注释
-    */
+   * 读取注释
+   */
   protected def readAttributes(sheet: Sheet, rowIndex: Int): List[Attribute] = {
     val row = sheet.getRow(rowIndex)
     val attrList = new collection.mutable.ListBuffer[Attribute]
@@ -110,8 +109,8 @@ class ExcelReader(is: InputStream, sheetNum: Int = 0, val format: Format = Forma
   }
 
   /**
-    * 取cell单元格中的数据
-    */
+   * 取cell单元格中的数据
+   */
   def getCellValue(cell: Cell, attribute: Attribute): Any = {
     if (cell == null) return null
     cell.getValue(attribute.dataType)
@@ -121,7 +120,7 @@ class ExcelReader(is: InputStream, sheetNum: Int = 0, val format: Format = Forma
     this.sheet.getWorkbook.close()
   }
 
-  /**   当前数据的位置   */
+  /** 当前数据的位置 */
   override def location: String = {
     indexInSheet.toString
   }
