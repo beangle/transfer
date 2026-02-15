@@ -22,8 +22,8 @@ import org.beangle.data.model.Entity
 import org.beangle.data.model.meta.{Domain, EntityType}
 import org.beangle.data.model.util.Populator
 import org.beangle.data.orm.Jpas
-import org.beangle.transfer.{IllegalFormatException, TransferLogger}
 import org.beangle.transfer.importer.Importer.Mode.{Insert, Update}
+import org.beangle.transfer.{IllegalFormatException, TransferLogger}
 
 /**
  * EntityImporter interface.
@@ -118,8 +118,12 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
     modeValidated
   }
 
-  /**
-   * Populate single attribute
+  /** Populate single attribute
+   *
+   * @param entity
+   * @param etype
+   * @param attr
+   * @param value
    */
   protected def populateValue(entity: Entity[_], etype: EntityType, attr: String, value: Any): Unit = {
     // 当有深层次属性,这里和传统的Populate不一样，导入面向的用户，属性可能出现foreigner.name之类的，在正常的form表单中不会出现

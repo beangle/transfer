@@ -19,8 +19,8 @@ package org.beangle.transfer.importer
 
 import org.beangle.commons.io.{DataType, IOs}
 import org.beangle.commons.lang.Strings
-import org.beangle.transfer.{Format, TransferLogger}
 import org.beangle.transfer.importer.{Attribute, Reader}
+import org.beangle.transfer.{Format, TransferLogger}
 
 import java.io.LineNumberReader
 

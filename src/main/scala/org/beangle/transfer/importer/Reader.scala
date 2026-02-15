@@ -20,13 +20,14 @@ package org.beangle.transfer.importer
 import org.beangle.transfer.Format
 
 /**
-  * ItemReader interface.
-  *
-  * @author chaostone
-  */
+ * ItemReader interface.
+ *
+ * @author chaostone
+ */
 trait Reader {
 
   def readAttributes(): List[Attribute]
+
   /**
    * 读取数据
    */
@@ -37,8 +38,9 @@ trait Reader {
    */
   def format: Format
 
-  /**当前数据的位置*/
-  def location:String
+  /** 当前数据的位置 */
+  def location: String
+
   /**
    * 关闭
    */

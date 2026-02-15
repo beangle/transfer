@@ -2,7 +2,7 @@ import org.beangle.parent.Dependencies.*
 import org.beangle.parent.Settings.*
 
 ThisBuild / organization := "org.beangle.transfer"
-ThisBuild / version := "0.0.5-SNAPSHOT"
+ThisBuild / version := "0.0.5"
 
 ThisBuild / scmInfo := Some(
   ScmInfo(
@@ -23,10 +23,10 @@ ThisBuild / developers := List(
 ThisBuild / description := "The Beangle Transfer Library"
 ThisBuild / homepage := Some(url("https://beangle.github.io/transfer/index.html"))
 
-val beangle_commons = "org.beangle.commons" % "beangle-commons" % "6.0.0"
-val beangle_model = "org.beangle.data" % "beangle-model" % "5.11.7"
-val beangle_template = "org.beangle.template" % "beangle-template" % "0.2.4"
-val beangle_doc_excel = "org.beangle.doc" % "beangle-doc-excel" % "0.5.2"
+val beangle_commons = "org.beangle.commons" % "beangle-commons" % "6.0.6"
+val beangle_model = "org.beangle.data" % "beangle-model" % "5.11.8"
+val beangle_template = "org.beangle.template" % "beangle-template" % "0.2.5"
+val beangle_doc_excel = "org.beangle.doc" % "beangle-doc-excel" % "0.5.3"
 
 lazy val root = (project in file("."))
   .settings(

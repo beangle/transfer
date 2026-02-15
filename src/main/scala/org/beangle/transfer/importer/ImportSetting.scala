@@ -45,6 +45,11 @@ class ImportSetting {
     listeners ::= listener
   }
 
+  /**
+   *
+   * @param clazz entity class
+   * @return a
+   */
   def addEntityClazz(clazz: Class[_]): ImportSetting = {
     val name = Strings.uncapitalize(Strings.substringAfterLast(clazz.getName, "."))
     addEntityClazz(clazz, name)
