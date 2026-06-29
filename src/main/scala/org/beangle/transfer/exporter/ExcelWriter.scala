@@ -73,7 +73,7 @@ class ExcelWriter(val outputStream: OutputStream) extends Writer {
     index += 1
   }
 
-  def createScheet(name: String): SXSSFSheet = {
+  def createSheet(name: String): SXSSFSheet = {
     if (null == sheet || null != name && !(this.sheet.getSheetName == name)) {
       this.sheet = if null != name then this.workbook.createSheet(name) else this.workbook.createSheet()
     }
@@ -94,7 +94,7 @@ class ExcelWriter(val outputStream: OutputStream) extends Writer {
   }
 
   override def writeHeader(caption: Option[String], titles: Array[String]): Unit = {
-    createScheet(null)
+    createSheet(null)
     this.titles = titles
     this.caption = caption
     this.index = 0
