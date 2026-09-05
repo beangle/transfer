@@ -18,12 +18,9 @@
 package org.beangle.transfer.exporter
 
 import org.apache.poi.ss.usermodel.*
-import org.apache.poi.ss.util.{CellRangeAddress, RegionUtil}
-import org.apache.poi.xssf.streaming.{SXSSFSheet, SXSSFWorkbook}
 import org.apache.poi.xssf.usermodel.*
 import org.beangle.commons.lang.Chars
-import org.beangle.doc.excel.CellOps.*
-import org.beangle.doc.excel.ExcelStyleRegistry
+import org.beangle.doc.excel.StreamingExcelWriter
 import org.beangle.transfer.Format
 
 import java.io.OutputStream
@@ -31,15 +28,14 @@ import java.io.OutputStream
 /**
  * ExcelItemWriter class.
  *
+ * 委托 StreamingExcelWriter 管理 workbook 生命周期、sheet 状态和数据写入，
+ * 自身保留 Writer 接口和导出特有的样式逻辑（caption、自动列宽等）。
+ *
  * @author chaostone
  */
 class ExcelWriter(val outputStream: OutputStream) extends Writer {
 
-  protected var workbook: SXSSFWorkbook = _ // 建立新XSSFWorkbook对象
-
-  protected var sheet: SXSSFSheet = _
-
-  private implicit var registry: ExcelStyleRegistry = _
+  protected var streamingWriter: StreamingExcelWriter = _
 
   protected var titles: Array[String] = _
 
@@ -47,117 +43,67 @@ class ExcelWriter(val outputStream: OutputStream) extends Writer {
 
   var flushCount = 1000
 
-  var countPerSheet = 100000
-
-  protected var index = 0
-
   init()
 
   def init(): Unit = {
-    workbook = new SXSSFWorkbook(flushCount)
-    registry = new ExcelStyleRegistry(workbook)
+    streamingWriter = new StreamingExcelWriter(flushCount)
   }
 
-  def close(): Unit = {
-    try {
-      workbook.write(outputStream)
-    } finally {}
-    workbook.close()
-  }
+  def save(): Unit = streamingWriter.save(outputStream)
+
+  override def close(): Unit = {}
 
   override def write(obj: Any): Unit = {
-    if (index + 1 >= countPerSheet) {
-      writeHeader(caption, titles)
-    }
-    writeItem(obj)
-    index += 1
-  }
-
-  def createSheet(name: String): SXSSFSheet = {
-    if (null == sheet || null != name && !(this.sheet.getSheetName == name)) {
-      this.sheet = if null != name then this.workbook.createSheet(name) else this.workbook.createSheet()
-    }
-    this.sheet
-  }
-
-  private def writeCaption(caption: Option[String]): Unit = {
-    caption foreach { c =>
-      val row = sheet.createRow(index) // 建立新行
-      val cell = row.createCell(0)
-      cell.fillin(c)
-      cell.setCellStyle(buildCaptionStyle())
-      val region = new CellRangeAddress(index, index, 0, titles.length - 1)
-      sheet.addMergedRegion(region)
-      RegionUtil.setBorderBottom(BorderStyle.THIN, region, sheet)
-      this.index += 1
-    }
+    obj match
+      case a: Array[Any]    => streamingWriter.writeRow(a.toSeq*)
+      case it: Iterable[Any] => streamingWriter.writeRow(it.toSeq*)
+      case other             => streamingWriter.writeRow(other)
   }
 
   override def writeHeader(caption: Option[String], titles: Array[String]): Unit = {
-    createSheet(null)
     this.titles = titles
     this.caption = caption
-    this.index = 0
-    writeCaption(caption)
-    writeItem(titles)
-    val titleRow = sheet.getRow(index)
-    val titleStyle = buildTitleStyle()
+
+    caption foreach { c =>
+      streamingWriter.writeCaption(c, titles.length, buildCaptionStyle())
+    }
 
     val maxWith = 15 * 2 //max 15 chinese chars
-    var h = 0d // number rows
-    for (i <- titles.indices) {
-      titleRow.getCell(i).setCellStyle(titleStyle)
+    var h = 0d
+    val widths = titles.indices.map { i =>
       val n = Chars.charLength(titles(i))
       val w = Math.min(n, maxWith)
       val r = n * 1.0 / maxWith
       if (r > h) h = r
-      sheet.setColumnWidth(i.toShort, (w + 4) * 256) // 4 is margin
-    }
+      w + 4 // 4 is margin
+    }.toSeq
     var height = Math.ceil(h).toInt
     if (height > 8) height = 8
-    titleRow.setHeight((height * 12 * 20).toShort)
+    val rowHeight = (height * 12 * 20).toShort
 
-    index += 1
-    sheet.createFreezePane(0, index)
+    streamingWriter.writeHeaders(titles.toSeq, buildTitleStyle(), widths, Some(rowHeight))
+    streamingWriter.freezePane(0, streamingWriter.getCurrentRowNum)
   }
 
   final def format: Format = Format.Xlsx
 
-  protected def writeItem(datas: Any): Unit = {
-    val row = sheet.createRow(index) // 建立新行
-    datas match
-      case null =>
-      case a: Array[Any] =>
-        a.indices foreach { i => row.createCell(i).fillin(a(i)) }
-      case it: Iterable[Any] =>
-        var i = 0
-        it.foreach { obj => row.createCell(i).fillin(obj); i += 1 }
-      case n: Number =>
-        val cell = row.createCell(0)
-        cell.setCellType(CellType.NUMERIC)
-        cell.setCellValue(new XSSFRichTextString(n.toString))
-      case a: Any =>
-        val cell = row.createCell(0)
-        cell.setCellValue(new XSSFRichTextString(a.toString))
-  }
-
   protected def buildTitleStyle(): XSSFCellStyle = {
-    val style = workbook.createCellStyle().asInstanceOf[XSSFCellStyle]
-    style.setAlignment(HorizontalAlignment.CENTER) // 左右居中
-    style.setVerticalAlignment(VerticalAlignment.CENTER) // 上下居中
+    val style = streamingWriter.getWorkbook.createCellStyle().asInstanceOf[XSSFCellStyle]
+    style.setAlignment(HorizontalAlignment.CENTER)
+    style.setVerticalAlignment(VerticalAlignment.CENTER)
     style.setFillPattern(FillPatternType.SOLID_FOREGROUND)
-    style.setWrapText(true) //auto wrap text
+    style.setWrapText(true)
     style.setFillForegroundColor(getHeaderForegroundColor())
     style
   }
 
   protected def buildCaptionStyle(): XSSFCellStyle = {
-    val style = workbook.createCellStyle().asInstanceOf[XSSFCellStyle]
-    style.setAlignment(HorizontalAlignment.CENTER) // 左右居中
-    style.setVerticalAlignment(VerticalAlignment.CENTER) // 上下居中
+    val style = streamingWriter.getWorkbook.createCellStyle().asInstanceOf[XSSFCellStyle]
+    style.setAlignment(HorizontalAlignment.CENTER)
+    style.setVerticalAlignment(VerticalAlignment.CENTER)
     style.setFillPattern(FillPatternType.SOLID_FOREGROUND)
     style.setFillForegroundColor(getHeaderForegroundColor())
-    val font = workbook.createFont()
+    val font = streamingWriter.getWorkbook.createFont()
     font.setBold(true)
     style.setFont(font)
     style
