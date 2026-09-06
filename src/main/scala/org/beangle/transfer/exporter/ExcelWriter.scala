@@ -20,7 +20,7 @@ package org.beangle.transfer.exporter
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.*
 import org.beangle.commons.lang.Chars
-import org.beangle.doc.excel.StreamingExcelWriter
+import org.beangle.doc.excel.stream.StreamingWriter
 import org.beangle.transfer.Format
 
 import java.io.OutputStream
@@ -35,29 +35,24 @@ import java.io.OutputStream
  */
 class ExcelWriter(val outputStream: OutputStream) extends Writer {
 
-  protected var streamingWriter: StreamingExcelWriter = _
+  private val streamingWriter = new StreamingWriter()
 
-  protected var titles: Array[String] = _
+  private var titles: Array[String] = _
 
-  protected var caption: Option[String] = None
+  private var caption: Option[String] = None
 
-  var flushCount = 1000
-
-  init()
-
-  def init(): Unit = {
-    streamingWriter = new StreamingExcelWriter(flushCount)
+  override def close(): Unit = {
+    streamingWriter.save(outputStream)
   }
 
-  def save(): Unit = streamingWriter.save(outputStream)
-
-  override def close(): Unit = {}
-
   override def write(obj: Any): Unit = {
+    if (streamingWriter.getCurrentRowNum == 0) {
+      writeHeader(caption, titles)
+    }
     obj match
-      case a: Array[Any]    => streamingWriter.writeRow(a.toSeq*)
-      case it: Iterable[Any] => streamingWriter.writeRow(it.toSeq*)
-      case other             => streamingWriter.writeRow(other)
+      case a: Array[Any] => streamingWriter.writeRow(a.toSeq *)
+      case it: Iterable[Any] => streamingWriter.writeRow(it.toSeq *)
+      case other => streamingWriter.writeRow(other)
   }
 
   override def writeHeader(caption: Option[String], titles: Array[String]): Unit = {
@@ -76,7 +71,7 @@ class ExcelWriter(val outputStream: OutputStream) extends Writer {
       val r = n * 1.0 / maxWith
       if (r > h) h = r
       w + 4 // 4 is margin
-    }.toSeq
+    }
     var height = Math.ceil(h).toInt
     if (height > 8) height = 8
     val rowHeight = (height * 12 * 20).toShort
@@ -88,7 +83,7 @@ class ExcelWriter(val outputStream: OutputStream) extends Writer {
   final def format: Format = Format.Xlsx
 
   protected def buildTitleStyle(): XSSFCellStyle = {
-    val style = streamingWriter.getWorkbook.createCellStyle().asInstanceOf[XSSFCellStyle]
+    val style = streamingWriter.createCellStyle()
     style.setAlignment(HorizontalAlignment.CENTER)
     style.setVerticalAlignment(VerticalAlignment.CENTER)
     style.setFillPattern(FillPatternType.SOLID_FOREGROUND)
@@ -98,12 +93,12 @@ class ExcelWriter(val outputStream: OutputStream) extends Writer {
   }
 
   protected def buildCaptionStyle(): XSSFCellStyle = {
-    val style = streamingWriter.getWorkbook.createCellStyle().asInstanceOf[XSSFCellStyle]
+    val style = streamingWriter.createCellStyle()
     style.setAlignment(HorizontalAlignment.CENTER)
     style.setVerticalAlignment(VerticalAlignment.CENTER)
     style.setFillPattern(FillPatternType.SOLID_FOREGROUND)
     style.setFillForegroundColor(getHeaderForegroundColor())
-    val font = streamingWriter.getWorkbook.createFont()
+    val font = streamingWriter.createFont()
     font.setBold(true)
     style.setFont(font)
     style

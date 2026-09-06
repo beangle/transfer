@@ -25,8 +25,8 @@ homepage := Some(uri("https://beangle.github.io/transfer/index.html"))
 
 val beangle_commons = "org.beangle.commons" % "beangle-commons" % "6.3.2"
 val beangle_model = "org.beangle.data" % "beangle-data-model" % "5.12.8"
-val beangle_template = "org.beangle.template" % "beangle-template" % "0.2.10"
-val beangle_doc_excel = "org.beangle.doc" % "beangle-doc-excel" % "0.5.12"
+val beangle_template = "org.beangle.template" % "beangle-template" % "0.2.11"
+val beangle_doc_excel = "org.beangle.doc" % "beangle-doc-excel" % "0.5.13"
 
 lazy val root = (project in file("."))
   .settings(
