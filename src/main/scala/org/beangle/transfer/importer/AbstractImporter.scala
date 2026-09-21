@@ -21,20 +21,21 @@ import org.beangle.commons.lang.Strings
 import org.beangle.transfer.TransferLogger
 
 import scala.collection.mutable.ListBuffer
+import scala.compiletime.uninitialized
 
 /** 导入的抽象和缺省实现
  *
  * @author chaostone
  */
 abstract class AbstractImporter(val config: Importer.Config) extends Importer {
-  protected var result: ImportResult = _
+  protected var result: ImportResult = uninitialized
   protected val listeners = new ListBuffer[ImportListener]
   protected val mstatus = new Importer.MutableStatus
   protected var objs = new collection.mutable.HashMap[String, AnyRef]
 
-  var reader: Reader = _
-  var attributes: Array[Attribute] = _
-  var datas: collection.mutable.Map[String, Any] = _
+  var reader: Reader = uninitialized
+  var attributes: Array[Attribute] = uninitialized
+  var datas: collection.mutable.Map[String, Any] = uninitialized
 
   protected def init(): Unit = {
     setAttributes(reader.readAttributes())
@@ -94,7 +95,7 @@ abstract class AbstractImporter(val config: Importer.Config) extends Importer {
   }
 
   private def read(): Boolean = {
-    val data = reader.read().asInstanceOf[Array[_]]
+    val data = reader.read().asInstanceOf[Array[?]]
     if (null == data) {
       this.datas = null
       false

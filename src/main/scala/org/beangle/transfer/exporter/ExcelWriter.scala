@@ -24,6 +24,7 @@ import org.beangle.doc.excel.stream.StreamingWriter
 import org.beangle.transfer.Format
 
 import java.io.OutputStream
+import scala.compiletime.uninitialized
 
 /**
  * ExcelItemWriter class.
@@ -37,7 +38,7 @@ class ExcelWriter(val outputStream: OutputStream) extends Writer {
 
   private val streamingWriter = new StreamingWriter()
 
-  private var titles: Array[String] = _
+  private var titles: Array[String] = uninitialized
 
   private var caption: Option[String] = None
 

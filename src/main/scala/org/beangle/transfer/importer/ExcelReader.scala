@@ -24,6 +24,7 @@ import org.beangle.transfer.Format
 import org.beangle.transfer.importer.{Attribute, Reader}
 
 import java.io.InputStream
+import scala.compiletime.uninitialized
 
 /**
  * Excel的每行一条数据的读取器（基于 StAX 流式读取，低内存）
@@ -34,8 +35,8 @@ class ExcelReader(is: InputStream, sheetNum: Int = 0, val format: Format = Forma
 
   private val streamingReader = new StreamingReader(is, sheetNum)
 
-  private var attrs: List[Attribute] = _
-  private var dataTypes: Array[DataType] = _
+  private var attrs: List[Attribute] = uninitialized
+  private var dataTypes: Array[DataType] = uninitialized
 
   override def readAttributes(): List[Attribute] = {
     val comments = streamingReader.comments

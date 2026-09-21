@@ -21,17 +21,18 @@ import org.beangle.commons.lang.Strings
 import org.beangle.data.model.Entity
 import org.beangle.data.model.meta.Domain
 import org.beangle.data.model.util.Populator
+import scala.compiletime.uninitialized
 
 /** 导入设置
  */
 class ImportSetting {
-  var domain: Domain = _
+  var domain: Domain = uninitialized
 
-  var populator: Populator = _
+  var populator: Populator = uninitialized
 
-  var reader: Reader = _
+  var reader: Reader = uninitialized
 
-  var entityClazzes: Map[String, Class[_]] = Map.empty
+  var entityClazzes: Map[String, Class[?]] = Map.empty
 
   var listeners: List[ImportListener] = List.empty[ImportListener]
 
@@ -50,13 +51,13 @@ class ImportSetting {
    * @param clazz entity class
    * @return a
    */
-  def addEntityClazz(clazz: Class[_]): ImportSetting = {
+  def addEntityClazz(clazz: Class[?]): ImportSetting = {
     val name = Strings.uncapitalize(Strings.substringAfterLast(clazz.getName, "."))
     addEntityClazz(clazz, name)
   }
 
-  def addEntityClazz(clazz: Class[_], shortName: String): ImportSetting = {
-    require(classOf[Entity[_]].isAssignableFrom(clazz))
+  def addEntityClazz(clazz: Class[?], shortName: String): ImportSetting = {
+    require(classOf[Entity[?]].isAssignableFrom(clazz))
     entityClazzes = entityClazzes.updated(shortName, clazz)
     this
   }

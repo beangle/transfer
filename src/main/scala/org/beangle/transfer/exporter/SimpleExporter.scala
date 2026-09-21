@@ -20,12 +20,13 @@ package org.beangle.transfer.exporter
 import org.beangle.transfer.{Format, TransferLogger}
 
 import java.io.OutputStream
+import scala.compiletime.uninitialized
 
 class SimpleExporter extends Exporter {
-  var current: Any = _
-  var context: ExportContext = _
-  var attrs: Array[String] = _
-  var writer: Writer = _
+  var current: Any = uninitialized
+  var context: ExportContext = uninitialized
+  var attrs: Array[String] = uninitialized
+  var writer: Writer = uninitialized
 
   override def exportData(os: OutputStream, context: ExportContext): Unit = {
     this.context = context

@@ -17,6 +17,8 @@
 
 package org.beangle.transfer.importer
 
+import scala.compiletime.uninitialized
+
 /**
  * 转换监听器
  *
@@ -47,7 +49,7 @@ trait ImportListener {
   /**
    * 设置转换器
    */
-  var importer: Importer = _
+  var importer: Importer = uninitialized
 
   /** 获取一个属性的对应的文字描述
    *

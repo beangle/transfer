@@ -24,6 +24,7 @@ import org.beangle.data.model.util.Populator
 import org.beangle.data.orm.Jpas
 import org.beangle.transfer.importer.Importer.Mode.{Insert, Update}
 import org.beangle.transfer.{IllegalFormatException, TransferLogger}
+import scala.compiletime.uninitialized
 
 /**
  * EntityImporter interface.
@@ -63,9 +64,9 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
   // [alias,entityType]
   protected val entityTypes = new collection.mutable.HashMap[String, EntityType]
 
-  var populator: Populator = _
+  var populator: Populator = uninitialized
 
-  var domain: Domain = _
+  var domain: Domain = uninitialized
 
   override protected def init(): Unit = {
     super.init()
@@ -125,7 +126,7 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
    * @param attr
    * @param value
    */
-  protected def populateValue(entity: Entity[_], etype: EntityType, attr: String, value: Any): Unit = {
+  protected def populateValue(entity: Entity[?], etype: EntityType, attr: String, value: Any): Unit = {
     // 当有深层次属性,这里和传统的Populate不一样，导入面向的用户，属性可能出现foreigner.name之类的，在正常的form表单中不会出现
     if (Strings.contains(attr, '.')) {
       val parentPath = Strings.substringBeforeLast(attr, ".")
@@ -146,7 +147,7 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
     }
   }
 
-  protected def validateMode(entity: Entity[_]): Boolean = {
+  protected def validateMode(entity: Entity[?]): Boolean = {
     config.mode match {
       case Insert => !Jpas.proxyResolver.isProxy(entity) //插入模式下，如果代理对象，说明已经被接管，保存过
       case Update => entity.persisted
@@ -154,14 +155,14 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
     }
   }
 
-  def addEntityClass(alias: String, entityClass: Class[_]): Unit = {
+  def addEntityClass(alias: String, entityClass: Class[?]): Unit = {
     domain.getEntity(entityClass) match {
       case Some(entityType) => entityTypes.put(alias, entityType)
       case None => throw new RuntimeException("cannot find entity type for " + entityClass)
     }
   }
 
-  protected def getEntity(alias: String): Entity[_] = {
+  protected def getEntity(alias: String): Entity[?] = {
     var entity = objs.get(alias).orNull
     if (null == entity) {
       entityTypes.get(alias) match {
@@ -173,7 +174,7 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
           throw new IllegalFormatException("Not register entity type for " + alias, null)
       }
     }
-    entity.asInstanceOf[Entity[_]]
+    entity.asInstanceOf[Entity[?]]
   }
 
   def aliases: Iterable[String] = entityTypes.keys

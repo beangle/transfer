@@ -26,6 +26,7 @@ import org.beangle.transfer.Format
 import java.io.OutputStream
 import java.net.URL
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 
 object ExportContext {
 
@@ -62,7 +63,7 @@ object ExportContext {
 
 class ExportContext(val format: Format) {
 
-  var exporter: Exporter = _
+  var exporter: Exporter = uninitialized
 
   val datas: collection.mutable.Map[String, Any] = Collections.newMap[String, Any]
 
@@ -70,7 +71,7 @@ class ExportContext(val format: Format) {
   /** Convert all property to string before export */
   var convertToString: Boolean = false
 
-  var typeFormatters: Map[Class[_], Formatter] = Map.empty
+  var typeFormatters: Map[Class[?], Formatter] = Map.empty
 
   var propertyFormatters: Map[String, Formatter] = Map.empty
 
@@ -78,15 +79,15 @@ class ExportContext(val format: Format) {
 
   var caption: Option[String] = None
 
-  var attrs: Array[String] = _
+  var attrs: Array[String] = uninitialized
 
-  var titles: Array[String] = _
+  var titles: Array[String] = uninitialized
 
-  var template: URL = _
+  var template: URL = uninitialized
 
-  var fileName: String = _
+  var fileName: String = uninitialized
 
-  def registerFormatter(clazz: Class[_], formatter: Formatter): ExportContext = {
+  def registerFormatter(clazz: Class[?], formatter: Formatter): ExportContext = {
     typeFormatters += (clazz -> formatter)
     this
   }

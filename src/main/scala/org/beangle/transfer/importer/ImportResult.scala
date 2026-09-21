@@ -18,6 +18,7 @@
 package org.beangle.transfer.importer
 
 import scala.collection.mutable.ListBuffer
+import scala.compiletime.uninitialized
 
 /**
  * 转换结果
@@ -30,7 +31,7 @@ class ImportResult {
 
   val errs = new ListBuffer[ImportMessage]
 
-  var importer: Importer = _
+  var importer: Importer = uninitialized
 
   def addFailure(message: String): Unit = {
     addFailure(message, null)

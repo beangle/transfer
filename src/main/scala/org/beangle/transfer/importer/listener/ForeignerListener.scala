@@ -25,6 +25,7 @@ import org.beangle.data.model.Entity
 import org.beangle.transfer.importer.{EntityImporter, ImportListener, ImportResult}
 
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 
 /** 导入数据外键监听器
  * 如果外键不存在，则目标中的外键会置成null；<br>
@@ -41,13 +42,13 @@ class ForeignerListener(entityDao: EntityDao) extends ImportListener {
   foreignerKeys += "code"
 
   /** 说明某个外键实体，应该限定的范围 */
-  private val scopes = Collections.newMap[Class[_], Map[String, Any]]
+  private val scopes = Collections.newMap[Class[?], Map[String, Any]]
 
   private var aliases: Set[String] = Set.empty
 
   private val ignores = Collections.newSet[String]
 
-  private var keyAttrs: Set[String] = _
+  private var keyAttrs: Set[String] = uninitialized
 
   override def onStart(tr: ImportResult): Unit = {
     aliases = importer.asInstanceOf[EntityImporter].aliases.toSet
@@ -80,7 +81,7 @@ class ForeignerListener(entityDao: EntityDao) extends ImportListener {
 
         val attr = substringAfter(attri, ".")
         var nestedForeigner = Properties.get[Object](entity, substring(attr, 0, attr.lastIndexOf(".")))
-        if (nestedForeigner.isInstanceOf[Option[_]]) {
+        if (nestedForeigner.isInstanceOf[Option[?]]) {
           nestedForeigner = nestedForeigner.asInstanceOf[Option[AnyRef]].orNull
         }
         nestedForeigner match {
@@ -90,7 +91,7 @@ class ForeignerListener(entityDao: EntityDao) extends ImportListener {
             if (foreignerMap.size > CACHE_SIZE) foreignerMap.clear()
             foreigner = foreignerMap.get(codeStr).orNull
             if (foreigner == null) {
-              val clazz = nestedForeigner.getClass.asInstanceOf[Class[Entity[_]]]
+              val clazz = nestedForeigner.getClass.asInstanceOf[Class[Entity[?]]]
               val foreigners = fetchForeigners(clazz, codeStr)
               if (foreigners.nonEmpty && foreigners.size == 1) {
                 foreigner = foreigners.head
@@ -104,19 +105,19 @@ class ForeignerListener(entityDao: EntityDao) extends ImportListener {
         }
         val parentAttr = substring(attr, 0, attr.lastIndexOf("."))
         val entityImporter = importer.asInstanceOf[EntityImporter]
-        entityImporter.populator.populate(entity.asInstanceOf[Entity[_]], entityImporter.domain.getEntity(entity.getClass).get, parentAttr, foreigner)
+        entityImporter.populator.populate(entity.asInstanceOf[Entity[?]], entityImporter.domain.getEntity(entity.getClass).get, parentAttr, foreigner)
       }
     }
   }
 
-  private def fetchForeigners(clazz: Class[Entity[_]], codeStr: String): Seq[Entity[_]] = {
+  private def fetchForeigners(clazz: Class[Entity[?]], codeStr: String): Seq[Entity[?]] = {
     val foreigners = queryForeigners(clazz, codeStr)
     if (foreigners.isEmpty && codeStr.contains(' ')) {
       queryForeigners(clazz, substringBefore(codeStr, " "))
     } else foreigners
   }
 
-  private def queryForeigners(clazz: Class[Entity[_]], codeStr: String): Seq[Entity[_]] = {
+  private def queryForeigners(clazz: Class[Entity[?]], codeStr: String): Seq[Entity[?]] = {
     val query = OqlBuilder.from(clazz, "f")
     scopes.get(clazz) foreach { params =>
       var i = 1
@@ -137,7 +138,7 @@ class ForeignerListener(entityDao: EntityDao) extends ImportListener {
     ignores ++= names
   }
 
-  def addScope(clazz: Class[_], params: Map[String, Any]): Unit = {
+  def addScope(clazz: Class[?], params: Map[String, Any]): Unit = {
     scopes.put(clazz, params)
   }
 }

@@ -18,6 +18,7 @@
 package org.beangle.transfer.importer
 
 import org.beangle.transfer.Format
+import scala.compiletime.uninitialized
 
 /**
  * 数据转换接口
@@ -64,10 +65,10 @@ object Importer {
   }
 
   private[importer] class MutableStatus extends Status {
-    var location: String = _
-    var index: Int = _
-    var failed: Int = _
-    var successed: Int = _
+    var location: String = uninitialized
+    var index: Int = uninitialized
+    var failed: Int = uninitialized
+    var successed: Int = uninitialized
   }
 
   case class Config(format: Format, mode: Importer.Mode, stopOnError: Boolean)
