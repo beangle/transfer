@@ -106,7 +106,7 @@ class ExcelWriter(val outputStream: OutputStream) extends Writer {
   }
 
   protected def getHeaderForegroundColor(): XSSFColor = {
-    val rgb = Array(221.toByte, 217.toByte, 196.toByte)
+    val rgb = Array(0xFF.toByte, 0xDD.toByte, 0xD9.toByte, 0xC4.toByte)
     new XSSFColor(rgb, new DefaultIndexedColorMap)
   }
 

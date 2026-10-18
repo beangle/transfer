@@ -17,11 +17,14 @@
 
 package org.beangle.transfer.exporter
 
+import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFWorkbook}
+import org.beangle.commons.io.DataType
 import org.beangle.commons.lang.SystemInfo
+import org.beangle.doc.excel.ExcelStyleRegistry
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import java.io.{File, FileOutputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, FileOutputStream}
 
 class ExcelWriterTest extends AnyFunSpec, Matchers {
   describe("ExcelWriter") {
@@ -35,6 +38,27 @@ class ExcelWriterTest extends AnyFunSpec, Matchers {
       writer.close()
       println("Excel文件已生成：" + tmpFile.getAbsolutePath)
       tmpFile.deleteOnExit()
+    }
+
+    it("writes an ARGB header color") {
+      val output = new ByteArrayOutputStream()
+      val writer = new ExcelWriter(output)
+      writer.writeHeader(None, Array("姓名"))
+      writer.write(Array("张三"))
+      writer.close()
+
+      val workbook = new XSSFWorkbook(new ByteArrayInputStream(output.toByteArray))
+      try {
+        val style = workbook.getSheetAt(0).getRow(0).getCell(0).getCellStyle.asInstanceOf[XSSFCellStyle]
+        style.getFillForegroundColorColor.getARGB shouldBe
+          Array[Byte](0xFF.toByte, 0xDD.toByte, 0xD9.toByte, 0xC4.toByte)
+      } finally workbook.close()
+    }
+
+    it("provides a non-empty default format for every data type") {
+      DataType.values.foreach { dataType =>
+        ExcelStyleRegistry.defaultFormat(dataType) should not be empty
+      }
     }
   }
 
