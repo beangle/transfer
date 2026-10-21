@@ -98,7 +98,7 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
         val entity = getEntity(name)
         if (!validateMode(entity)) {
           modeValidated = false
-          result.addFailure("该模式下无法导入该行数据")
+          result.addFailure(invalidModeMessage)
         } else {
           subDatas foreach { kv =>
             var value = kv._2
@@ -149,10 +149,17 @@ class DefaultEntityImporter(config: Importer.Config) extends AbstractImporter(co
 
   protected def validateMode(entity: Entity[?]): Boolean = {
     config.mode match {
-      case Insert => !Jpas.proxyResolver.isProxy(entity) //插入模式下，如果代理对象，说明已经被接管，保存过
+      //插入模式下，如果代理对象，说明已经被接管，保存过；监听器装入的已有实体不是代理，同样拒绝
+      case Insert => !entity.persisted && !Jpas.proxyResolver.isProxy(entity)
       case Update => entity.persisted
       case _ => true
     }
+  }
+
+  private def invalidModeMessage: String = config.mode match {
+    case Insert => "新导入模式下该数据已存在"
+    case Update => "更新模式下该数据不存在"
+    case _ => "该模式下无法导入该行数据"
   }
 
   def addEntityClass(alias: String, entityClass: Class[?]): Unit = {
